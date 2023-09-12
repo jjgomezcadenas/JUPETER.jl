@@ -23,8 +23,48 @@ begin
 	using GeometryBasics, Rotations, IGLWrap_jll
 end
 
+# ╔═╡ f2518109-6414-4465-b154-cca405b92a9e
+md"""
+# Scrystal
+
+Example of G4-Julia application. 
+
+It compares the performance (in terms of fraction of events that interact in the crystal and fraction of events in the photoelectric peak) of three crystals. LYSO, BGO and CsI
+"""
+
+# ╔═╡ 2b4de888-9f6f-4e0d-a628-23be598c9924
+md"""
+- Activate the packages in JUPETER.
+"""
+
+# ╔═╡ 26b21ec5-1510-4e1c-a13b-be53f38b234c
+md"""
+- Include the Geant4 specific packages
+"""
+
+# ╔═╡ e3aec93a-90a0-453b-9e9e-938bb41f5c15
+md"""
+- Include other packages (for the moment only PlutoUI)
+"""
+
 # ╔═╡ 318da72f-2518-42a2-a24d-ac4c0bae6b1b
 import PlutoUI
+
+# ╔═╡ ede57068-01de-4aa4-a182-be4dfa1928f4
+#begin
+#	srcdir = string(findrdir(), "src")
+	#include(joinpath(srcdir, "crstDet.jl"))
+	#include(joinpath(srcdir, "crstSimData.jl"))
+	#include(joinpath(srcdir, "crstUserActions.jl"))
+#end
+
+# ╔═╡ 2a503628-7bf6-4026-a770-cafe1a7ebea4
+md"""
+##### Define the geometry of the setup
+- Transverse crystal size (we will take the thickness as 1X0 in every case)
+- Size of the World (a box of air surrounding the detector)
+- Position of the gun (gammas of 511 keV)
+"""
 
 # ╔═╡ b7ae5979-1af1-4a33-9b2f-7a5094876ba3
 md""" Select crystal size : $(@bind xt PlutoUI.NumberField(1.0:0.1:10.0; default=3.5))"""
@@ -40,22 +80,29 @@ md""" Select zgun : $(@bind zgun PlutoUI.NumberField(5.5:0.1:10.0; default=10.0)
 
 # ╔═╡ ed1f83d7-2f71-47fb-9492-2402600fdb9f
 md"""
-#### Define crystals of LYSO, BGO and CsI (cryogenic)
+##### Define crystals of LYSO, BGO and CsI (cryogenic)
+- This is done in three steps:
+1. Define the material of the crystal (**g4Material**)
+2. Define its properties as scintillator (**ScintMaterial**)
+3. Define the physical object (a box filled with the material chosen, **g4Box**)
 """
 
 # ╔═╡ 04b01b62-ec6b-47c1-83ef-a179fec1b141
 md"""
-#### Define World (a box with air)
+##### Define World (a box with air)
 """
 
 # ╔═╡ 7aa3defb-3d9d-4032-9f8c-736aeb63aaa6
 md"""
-#### Define crystal detector for LYSO
+##### Define crystal detector for LYSO
+- The crystal detector is defined by passing to function **crstDetector** the world and the crystal physical objects. We set **checkOverlaps=true** the first time (in this example we could have set it to false all the time there is only one crystal). 
+- In **crstDetector**, the crystal is placed inside the World and the "detector" os returned. This is the obect that gets passed to the app that will run events.
 """
 
 # ╔═╡ 2ff98bd5-55ff-4d89-a8f4-29c7631ba775
 md"""
-#### Define Particle gun
+##### Define Particle gun
+- Gamma of 511 keV place in the low-z face of the crystal (at some distance of it) and advancing in z.
 """
 
 # ╔═╡ b3e0c7ad-0ddf-4786-99d5-825af569dd47
@@ -67,7 +114,8 @@ particlegun = G4JLGunGenerator(particle = "gamma",
 
 # ╔═╡ 958fdf5a-baa6-4214-ab04-a7c0b3b43d69
 md"""
-#### Define application
+##### Define application
+- Check the box to run the application when 
 """
 
 # ╔═╡ 2584759f-42af-45d9-a5d1-1857798d94e2
@@ -75,7 +123,7 @@ md"Run app? $(@bind runapp PlutoUI.CheckBox(default=false))"
 
 # ╔═╡ 760d76c1-5cd7-46ab-8bd7-294b3a808ac3
 md"""
-#### Trigger and draw individual events
+##### Trigger and draw individual events
 """
 
 # ╔═╡ 6da5fd9d-ddcf-467d-9511-6fd69e573890
@@ -83,6 +131,11 @@ md"trigger and draw events? $(@bind nxt PlutoUI.CheckBox(default=false))"
 
 # ╔═╡ 61a849b0-98d4-44e5-a930-c1156427a266
 @bind go PlutoUI.Button("Trigger event")
+
+# ╔═╡ 03364bd0-3891-44f1-ba62-02a3b039cf04
+md"""
+##### Run with LYSO 
+"""
 
 # ╔═╡ 5fd011d6-fa2b-4ef4-ba61-06b3e90a41c3
 md"Run analysis for a single crystal? $(@bind anx PlutoUI.CheckBox(default=false))" 
@@ -584,14 +637,6 @@ end
 # ╔═╡ 87195243-2626-4509-b58d-bb86b6128f91
 using Pkg; Pkg.activate(findrdir())
 
-# ╔═╡ ede57068-01de-4aa4-a182-be4dfa1928f4
-begin
-	srcdir = string(findrdir(), "src")
-	#include(joinpath(srcdir, "crstDet.jl"))
-	#include(joinpath(srcdir, "crstSimData.jl"))
-	#include(joinpath(srcdir, "crstUserActions.jl"))
-end
-
 # ╔═╡ f49001d9-c1cb-41d9-8659-aca18e5b89c7
 md"""
 ### Geant4-Julia Interface
@@ -646,41 +691,47 @@ Pass the BoxDetector object to G4
 Geant4.getConstructor(::crstDetector)::Function = crstDetectorConstruction
 
 # ╔═╡ Cell order:
+# ╟─f2518109-6414-4465-b154-cca405b92a9e
+# ╟─2b4de888-9f6f-4e0d-a628-23be598c9924
 # ╠═87195243-2626-4509-b58d-bb86b6128f91
+# ╟─26b21ec5-1510-4e1c-a13b-be53f38b234c
 # ╠═da44a5a8-63d4-4f51-9ae5-4fd7ec1eeb9a
+# ╟─e3aec93a-90a0-453b-9e9e-938bb41f5c15
 # ╠═318da72f-2518-42a2-a24d-ac4c0bae6b1b
-# ╠═ede57068-01de-4aa4-a182-be4dfa1928f4
-# ╠═b7ae5979-1af1-4a33-9b2f-7a5094876ba3
-# ╠═709c0542-69fd-4709-a170-51e90dc019cc
-# ╠═02508a2b-a483-46a7-aa5c-31f20d259ad6
-# ╠═82ec0e6e-68db-4f51-8537-7176142455fe
-# ╠═ed1f83d7-2f71-47fb-9492-2402600fdb9f
+# ╟─ede57068-01de-4aa4-a182-be4dfa1928f4
+# ╟─2a503628-7bf6-4026-a770-cafe1a7ebea4
+# ╟─b7ae5979-1af1-4a33-9b2f-7a5094876ba3
+# ╟─709c0542-69fd-4709-a170-51e90dc019cc
+# ╟─02508a2b-a483-46a7-aa5c-31f20d259ad6
+# ╟─82ec0e6e-68db-4f51-8537-7176142455fe
+# ╟─ed1f83d7-2f71-47fb-9492-2402600fdb9f
 # ╠═220ae589-e928-43b6-860d-5624416d8b7b
 # ╠═e5e475ae-8dbc-4659-930b-f45d11d78dc9
 # ╠═4bb28472-64fa-4b1b-beff-d457b7fffcf5
-# ╠═04b01b62-ec6b-47c1-83ef-a179fec1b141
+# ╟─04b01b62-ec6b-47c1-83ef-a179fec1b141
 # ╠═0f3c5d45-0c38-40c0-9855-f257a0d846e5
-# ╠═7aa3defb-3d9d-4032-9f8c-736aeb63aaa6
+# ╟─7aa3defb-3d9d-4032-9f8c-736aeb63aaa6
 # ╠═f7fc9254-9d90-4882-b954-0116b5112ee2
 # ╠═36d46822-3cc7-4714-a8c7-9da03ac60263
-# ╠═2ff98bd5-55ff-4d89-a8f4-29c7631ba775
+# ╟─2ff98bd5-55ff-4d89-a8f4-29c7631ba775
 # ╠═b3e0c7ad-0ddf-4786-99d5-825af569dd47
 # ╠═958fdf5a-baa6-4214-ab04-a7c0b3b43d69
 # ╠═2584759f-42af-45d9-a5d1-1857798d94e2
 # ╠═da3595d6-ab96-4b84-9702-91297c8f66e3
-# ╠═760d76c1-5cd7-46ab-8bd7-294b3a808ac3
-# ╠═6da5fd9d-ddcf-467d-9511-6fd69e573890
-# ╠═61a849b0-98d4-44e5-a930-c1156427a266
+# ╟─760d76c1-5cd7-46ab-8bd7-294b3a808ac3
+# ╟─6da5fd9d-ddcf-467d-9511-6fd69e573890
+# ╟─61a849b0-98d4-44e5-a930-c1156427a266
 # ╠═643549e6-0e11-48a7-911f-b351363cc6b1
-# ╠═5fd011d6-fa2b-4ef4-ba61-06b3e90a41c3
-# ╠═548267cf-2d21-4508-b590-4b4ae54797b5
-# ╠═3f674191-d5db-487e-aba5-941e531cb38b
+# ╟─03364bd0-3891-44f1-ba62-02a3b039cf04
+# ╟─5fd011d6-fa2b-4ef4-ba61-06b3e90a41c3
+# ╟─548267cf-2d21-4508-b590-4b4ae54797b5
+# ╟─3f674191-d5db-487e-aba5-941e531cb38b
 # ╠═ee08a598-b0a1-4f64-a4e7-dc5d28598d20
-# ╠═ba11b408-e4f0-4d69-9874-3b977914134b
+# ╟─ba11b408-e4f0-4d69-9874-3b977914134b
 # ╠═cb43ae23-eeca-4d6a-b282-51c54b579871
 # ╠═3eaab173-16b8-4ceb-8dba-da6d3c22d694
 # ╠═5bc0af4f-337e-4485-bbf2-84d38b9b09f0
-# ╠═ca7335db-11ca-40cc-baf4-ee48d9fd136d
+# ╟─ca7335db-11ca-40cc-baf4-ee48d9fd136d
 # ╠═a8c3e6a2-c691-4b2e-a6fd-b872215fa053
 # ╠═3619681e-6c74-471a-bd0e-5128a728d0d4
 # ╠═92538392-a68c-4ef1-a302-a2dafbe07ba2
