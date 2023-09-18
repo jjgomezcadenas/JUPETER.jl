@@ -1,0 +1,1 @@
+Geant4.getConstructor(::ScintDetector)::Function = scintConstruct

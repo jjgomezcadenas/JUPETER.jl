@@ -1,5 +1,10 @@
 module JUPETER
 
-# Write your package code here.
-
+#using Revise
+include("scParameters.jl")
+include("scDetector.jl")
+include("scUserActions.jl")
+#include("../test/runtests.jl")
 end
+
+

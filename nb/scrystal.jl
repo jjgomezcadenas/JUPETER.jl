@@ -691,7 +691,7 @@ Pass the BoxDetector object to G4
 Geant4.getConstructor(::crstDetector)::Function = crstDetectorConstruction
 
 # ╔═╡ Cell order:
-# ╟─f2518109-6414-4465-b154-cca405b92a9e
+# ╠═f2518109-6414-4465-b154-cca405b92a9e
 # ╟─2b4de888-9f6f-4e0d-a628-23be598c9924
 # ╠═87195243-2626-4509-b58d-bb86b6128f91
 # ╟─26b21ec5-1510-4e1c-a13b-be53f38b234c
