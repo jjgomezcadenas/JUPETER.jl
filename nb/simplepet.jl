@@ -4,49 +4,165 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
 # ╔═╡ 10c0c25c-51c8-4df9-a173-5219b0066b0d
 begin
 	using Geant4
 	using Geant4.SystemOfUnits
 	using Geant4.PhysicalConstants
-	using Geant4.SystemOfUnits: mm, m, cm3, ns
+	using Geant4.SystemOfUnits: mm, m, micrometer, cm3, ns
 	import CairoMakie
 	using GeometryBasics, Rotations, IGLWrap_jll
 end
 
-# ╔═╡ 2981407b-fe86-49f4-a56e-eb8750ea4803
-(1966 - 3.34 * 15 * 36) / 35
+# ╔═╡ d96ff12a-912b-42f1-aa5a-e2e3e094013b
+begin
+	using PlutoUI
+end
 
-# ╔═╡ 9b0557ec-2eaa-4179-9e6d-4d29eed78585
-6 * 16 * 8
+# ╔═╡ d3b7d9f0-c1e3-4b7c-8fdb-60c1f87c5288
 
-# ╔═╡ f9c9986c-c7c6-4b21-85a6-7f37d119a7ec
-radius(sc, nc, nd)  = sc * nc * nd / 2π
 
-# ╔═╡ 8abdeb8e-5124-465c-87cf-e6a7d05b4d1b
-radius(6mm, 16, 51)
 
-# ╔═╡ 6b19af15-4cdc-4bfa-8d86-02e742df8ba1
- (1600π - 2π*radius(6mm, 16, 51))/50
+# ╔═╡ d611396b-42c5-45f1-a7d2-a9ca35e201b4
+md"""
+## Total Body PET
+### Define the geometry of the setup
+"""
+
+# ╔═╡ 7d57da90-c068-49be-86a0-44b9bdb65650
+md""" Select crystal : $(@bind xname PlutoUI.Select(["LYSO", "BGO", "CSI"]))"""
+
+# ╔═╡ a6ec6b55-c3a4-422f-87e4-85bdc4f0653f
+md""" Select size of crystal along x (mm) : $(@bind xt PlutoUI.NumberField(1.0:0.1:100.0; default=40.0))"""
+
+
+# ╔═╡ 16cc8b24-b929-4db5-9600-088ecd47200d
+md""" Select size of crystal along y (mm) : $(@bind yt PlutoUI.NumberField(1.0:0.1:100.0; default=6.0))"""
+
+# ╔═╡ 7f2f5fe2-07b7-42df-92b5-a399093a13e4
+md""" Select size of crystal along z (mm) : $(@bind zt PlutoUI.NumberField(1.0:0.1:100.0; default=6.0))"""
+
+# ╔═╡ e6a841fb-cdbc-47fc-acef-ad93b9ec0970
+begin
+	sizeOfCrystal_x = xt * mm
+	sizeOfCrystal_tangential = yt * mm 
+	sizeOfCrystal_axial = zt * mm 
+	crho = Dict("LYSO"=>11.0mm, "BGO"=>11.0mm, "CsI"=>11.0mm)
+	cdecayTime=Dict("LYSO"=>40*ns, "BGO"=>300*ns, "CsI"=>1000*ns) 
+	clightYieldPhKeV = Dict("LYSO"=>25, "BGO"=>8, "CsI"=>100)
+	xz = 2*crho[xname]
+	nothing
+end
+
+# ╔═╡ cf75476c-44f6-4a81-b14d-28d43ebc60f4
+md"""
+#### Crystal
+- crystal = $xname
+- radiation length = $(crho[xname]) mm
+- decay time = $(cdecayTime[xname]) ns
+- Light Yield = $(clightYieldPhKeV[xname]) photons/keV
+- Crystal size: x = $xt mm; y = $yt mm; z = $zt mm;
+"""
+
+# ╔═╡ 47823b34-fa27-4964-9ffa-7731999718f0
+md"""
+#### Module (aka Block)
+"""
+
+# ╔═╡ d8f64915-fa87-43cf-8071-118f3e4024cc
+md""" Select number of crystals per module along x : $(@bind numberOfCrystal_DOI PlutoUI.NumberField(1:10; default=1))"""
+
+# ╔═╡ b8fd8ee9-458b-4a31-a7cb-3ade41937385
+md""" Select number of crystals per module tangential (along y) : $(@bind numberOfCrystal_tangential PlutoUI.NumberField(1:20; default=8))"""
+
+# ╔═╡ 2de84055-45d5-494f-aaf6-1d1c541143c2
+md""" Select number of crystals per module axial (along z) : $(@bind numberOfCrystal_axial PlutoUI.NumberField(1:20; default=8))"""
+
+# ╔═╡ 22474b14-f74b-44d5-b42e-2eee640d3ae8
+md""" Select crystal gap (thickness of reflector in μm) : $(@bind crystalGap PlutoUI.NumberField(10.0:100.0; default=80.0))""" 
+
+# ╔═╡ d443a4a2-652d-4a44-bd80-8e8516c122f6
+begin
+	
+end
+
+# ╔═╡ ec06700d-867e-4dab-88de-0873cba1e7d9
+md""" Select al cover thickness (μm): $(@bind  actmu PlutoUI.NumberField(10.0:500.0; default=300.0))""" 
+
+# ╔═╡ 61dfd680-0d2a-40ff-91a5-7b167e2e753d
+
+
+# ╔═╡ 32b7f676-3db7-4208-b3f4-61ac2839bb3d
+md"""
+#### Wheel (aka RING)
+"""
+
+# ╔═╡ 03f8baef-c40c-4abd-b0ae-2c4dd3c0538f
+md""" Select number of modules per Wheel  : $(@bind numberOfDetector_perRing PlutoUI.NumberField(1:100; default=51))"""
+
+# ╔═╡ a1a32ef5-5d2a-4e21-ad57-0c0513d9c5ef
+md""" Select number of Wheels in scanner  : $(@bind numberOfRings PlutoUI.NumberField(1:100; default=20))"""
+
+# ╔═╡ fb17313d-6d76-4732-acca-058d0b8209f7
+md""" Select ring gap in mm  : $(@bind rngap PlutoUI.NumberField(1.0:20.0; default=5.0))"""
+
+# ╔═╡ 094936fc-019f-4ea2-be29-39ec888db81a
+md"""
+#### Scanner radius
+"""
+
+# ╔═╡ 735a817c-3aa8-492c-bace-03436f51220e
+md""" Select scanner radius in mm  : $(@bind scnr PlutoUI.NumberField(100.0:1000.0; default=400.0))"""
+
+# ╔═╡ 95a18519-34e1-4fcb-ab97-c12d37a7ab89
+begin
+	scannerRadius           = scnr * mm
+	aluminumCoverThickness  = actmu * micrometer
+	crystalGap_DOI          = crystalGap * micrometer
+	crystalGap_tangential   = crystalGap * micrometer
+	crystalGap_axial        = crystalGap * micrometer
+	ringGap                 = rngap * mm
+	nothing
+end
+
+# ╔═╡ 12270d91-2a57-4ac2-a277-7e3c806ddb3a
+md"""
+#### Pet detector
+"""
 
 # ╔═╡ 5683139e-0409-4c2c-9636-3df16d394410
 
 #
-#draw(pv[], wireframe=true)
+md" Draw block? $(@bind drawblk PlutoUI.CheckBox(default=false))" 
+
+
+# ╔═╡ 554b8b2e-5c5a-4ba1-8eb2-e97c104c3327
+md" Draw scanner? $(@bind drawscanner PlutoUI.CheckBox(default=false))" 
+
 
 # ╔═╡ b43e765f-c4ae-4e73-8fb8-d11d5a80a6db
 mutable struct PetDetector <: G4JLDetector
 
 	# World
-	const worldSizeXY::Float64
-	const worldSizeZ::Float64
+	#const worldSizeXY::Float64
+	#const worldSizeZ::Float64
 
 	# crystal type 
 
 	const crstName::String
 	
     # size of the crystals in the DOI (x), tangential (y) and axial (z) direction.
-	const sizeOfCrystal_DOI::Float64 
+	const sizeOfCrystal_x::Float64 
 	const sizeOfCrystal_tangential::Float64 
 	const sizeOfCrystal_axial::Float64 
 	
@@ -80,32 +196,49 @@ mutable struct PetDetector <: G4JLDetector
 	# overlaps
     const checkOverlaps::Bool
 
+	# Computed variables
 	# Crystal material
 	crystalMaterial::CxxPtr{G4Material}
 
-	function PetDetector(; worldSizeXY = 1.0m,
-						   worldSizeZ = 1.0m,
-						   crstName = "LYSO",
-	                       sizeOfCrystal_DOI = 40.0mm,
-						   sizeOfCrystal_tangential = 3.0mm,
-						   sizeOfCrystal_axial = 3.0mm,
-                           numberOfCrystal_DOI=1,             
-						   numberOfCrystal_tangential=16,      
-						   numberOfCrystal_axial=16, 
-	                       numberOfDetector_perRing = 40,
-	                       numberOfRings=4,
-						   crystalGap_DOI=0.08mm,
-						   crystalGap_tangential=0.08mm,
-                           crystalGap_axial=0.08mm,
-	                       aluminumCoverThickness=0.3mm,
-                           scannerRadius=330.0mm, 
-	                       ringGap=10.4mm,
-						   checkOverlaps = true)
+	# air box takes into account the space between crystals 
+	# e.g., the reflectors. It could be filled with Teflon rather than aire
+	# but for simple simulations does not make a difference. 
+	
+	sizeOfAirBox_DOI::Float64
+	sizeOfAirBox_axial::Float64 
+	sizeOfAirBox_tangential::Float64 
 
-		self = new(worldSizeXY, 
-			       worldSizeZ,
-			       crstName,
-				   sizeOfCrystal_DOI,
+	# the size of the block is obtained adding the Al cover.
+	sizeOfBlockDetector_DOI::Float64
+	sizeOfBlockDetector_axial::Float64
+	sizeOfBlockDetector_tangential::Float64
+
+	# axial length 
+	axialLength::Float64
+
+	# World size.
+	worldSizeXY::Float64
+	worldSizeZ::Float64
+
+	function PetDetector(; crstName = "LYSO",
+							sizeOfCrystal_x = 40.0mm,
+							sizeOfCrystal_tangential = 6.0mm,
+							sizeOfCrystal_axial = 6.0mm,
+							numberOfCrystal_DOI=1,             
+							numberOfCrystal_tangential=16,      
+							numberOfCrystal_axial=16, 
+							numberOfDetector_perRing = 40,
+							numberOfRings=4,
+							crystalGap_DOI=0.08mm,
+							crystalGap_tangential=0.08mm,
+							crystalGap_axial=0.08mm,
+							aluminumCoverThickness=0.3mm,
+							scannerRadius=330.0mm, 
+							ringGap=10.4mm,
+							checkOverlaps = true)
+
+		self = new(crstName,
+				   sizeOfCrystal_x,
 	     		   sizeOfCrystal_tangential,
 	     		   sizeOfCrystal_axial,
 	     		   numberOfCrystal_DOI,             
@@ -120,7 +253,28 @@ mutable struct PetDetector <: G4JLDetector
 				   scannerRadius, 
 				   ringGap,
 				   checkOverlaps)
+	
+		self.sizeOfAirBox_DOI = (numberOfCrystal_DOI * sizeOfCrystal_x) + (
+			                numberOfCrystal_DOI - 1) * crystalGap_DOI
+		
+		self.sizeOfAirBox_axial = (numberOfCrystal_axial * sizeOfCrystal_axial) + (
+		                    numberOfCrystal_axial - 1) * crystalGap_axial
+		
+		self.sizeOfAirBox_tangential = (numberOfCrystal_tangential * 
+		sizeOfCrystal_tangential) + (
+		numberOfCrystal_tangential - 1) * crystalGap_tangential
 
+		self.sizeOfBlockDetector_DOI = self.sizeOfAirBox_DOI + aluminumCoverThickness
+		self.sizeOfBlockDetector_axial = self.sizeOfAirBox_axial + aluminumCoverThickness
+		self.sizeOfBlockDetector_tangential = self.sizeOfAirBox_tangential + aluminumCoverThickness
+
+		self.axialLength = numberOfRings * self.sizeOfBlockDetector_axial +(numberOfRings -1) * ringGap
+		
+		self.worldSizeXY = scannerRadius * 2 + self.sizeOfAirBox_DOI + 50mm
+		self.worldSizeZ = self.axialLength + 50mm
+
+		
+	
 		nist     = G4NistManager!Instance()
 		if crstName == "LYSO"
             lyso = G4Material("lyso", density= 7.4*g/cm3, ncomponents=4)
@@ -146,18 +300,53 @@ end
     
     
 
-# ╔═╡ d3b7d9f0-c1e3-4b7c-8fdb-60c1f87c5288
-pdet= PetDetector(worldSizeXY = 2.0m,
-				  worldSizeZ = 2.0m, 
-				  sizeOfCrystal_tangential = 6.0mm,
-				  sizeOfCrystal_axial = 6.0mm,
-				  numberOfCrystal_tangential=16,      
-				  numberOfCrystal_axial=16,
-                  numberOfDetector_perRing = 51,
-                  scannerRadius=800.0mm, 
-				  ringGap=5.0mm,
-                  numberOfRings=16)
+# ╔═╡ c464eff2-733a-40ce-9b5e-03eae2c63913
+pdet= PetDetector(crstName = xname,
+	              sizeOfCrystal_x = sizeOfCrystal_x,
+				  sizeOfCrystal_tangential = sizeOfCrystal_tangential,
+	              sizeOfCrystal_axial = sizeOfCrystal_axial,
+				  numberOfCrystal_DOI = numberOfCrystal_DOI,
+				  numberOfCrystal_tangential = numberOfCrystal_tangential,      
+				  numberOfCrystal_axial = numberOfCrystal_axial,
+                  numberOfDetector_perRing = numberOfDetector_perRing,
+				  numberOfRings = numberOfRings,
+				  crystalGap_DOI = crystalGap_DOI,
+			      crystalGap_tangential = crystalGap_tangential,
+				  crystalGap_axial = crystalGap_axial,
+				  aluminumCoverThickness = aluminumCoverThickness, 
+                  scannerRadius = scannerRadius, 
+				  ringGap=ringGap,
+                  checkOverlaps=true)
 
+
+# ╔═╡ fb0098b4-fe81-4a72-bcc6-bc6c7d0eedf9
+md"""
+#### Blocks
+- size BlockDetector DOI (x) mm = $(pdet.sizeOfBlockDetector_DOI)
+- size BlockDetector axial (z) mm = $(pdet.sizeOfBlockDetector_axial)
+- size BlockDetector tangential (y) mm $(pdet.sizeOfBlockDetector_tangential)
+"""
+
+# ╔═╡ 47110cdf-c511-4f95-b1cb-81236e436659
+function num_crystals(det::PetDetector) 
+	crystal_module = (det.numberOfCrystal_DOI *det.numberOfCrystal_tangential *  
+	                  det.numberOfCrystal_axial)
+	
+	crystals_ring = det.numberOfDetector_perRing * crystal_module
+	
+	det.numberOfRings * crystals_ring
+end
+
+# ╔═╡ 88f2904f-b1bf-406b-a0e4-69b533fe8281
+md"""
+#### Scanner
+- number of crystals in scanner = $(num_crystals(pdet))
+- Scanner diameter (mm) =$(pdet.scannerRadius * 2) (WorldXY = $(pdet.worldSizeXY)  )
+- Scanner axial length (mm) =$(pdet.axialLength) (WorldZ = $(pdet.worldSizeZ)  )
+"""
+
+# ╔═╡ e61962d4-cb13-43d1-ac1d-550d0c69ff8e
+num_crystals(pdet) 
 
 # ╔═╡ fc732bc2-cc9e-4416-bd6a-71438b158402
 function worldConstruction(det::PetDetector)::CxxPtr{G4VPhysicalVolume}
@@ -185,7 +374,7 @@ end
 # ╔═╡ 9e436e02-ccf7-4ee6-b104-1e0c34991131
 function sizeBlock(det::PetDetector)
 	(; worldSizeXY, worldSizeZ, crstName,
-	   sizeOfCrystal_DOI,
+	   sizeOfCrystal_x,
 	   sizeOfCrystal_tangential,
 	   sizeOfCrystal_axial,
        numberOfCrystal_DOI,             
@@ -202,7 +391,7 @@ function sizeBlock(det::PetDetector)
        checkOverlaps, crystalMaterial)  = det
 
 	
-	sizeOfAirBox_DOI = (numberOfCrystal_DOI * sizeOfCrystal_DOI
+	sizeOfAirBox_DOI = (numberOfCrystal_DOI * sizeOfCrystal_x
     ) + (numberOfCrystal_DOI - 1) * crystalGap_DOI
 	sizeOfAirBox_axial = (numberOfCrystal_axial * sizeOfCrystal_axial
     ) + (numberOfCrystal_axial - 1) * crystalGap_axial
@@ -263,7 +452,7 @@ end
 # ╔═╡ f8387935-8726-4db9-8679-56dff32719e7
 function blockConstruction(det::PetDetector)::CxxPtr{G4VPhysicalVolume}
     (; worldSizeXY, worldSizeZ, crstName,
-	   sizeOfCrystal_DOI,
+	   sizeOfCrystal_x,
 	   sizeOfCrystal_tangential,
 	   sizeOfCrystal_axial,
        numberOfCrystal_DOI,             
@@ -359,13 +548,17 @@ function blockConstruction(det::PetDetector)::CxxPtr{G4VPhysicalVolume}
 end
 
 # ╔═╡ ba184fb2-1b74-4728-ab9e-eb213a178808
-#pv = petDetectorConstruction(pdet)
-pv = blockConstruction(pdet)
+if drawscanner
+	let
+		pv = blockConstruction(pdet)
+		draw(pv[], wireframe=true)
+	end
+end
 
 # ╔═╡ 12e279bb-3a7d-45bd-9c46-526807c365ea
 function crystalConstruction(det::PetDetector)::CxxPtr{G4VPhysicalVolume}
     (; worldSizeXY, worldSizeZ, crstName,
-	   sizeOfCrystal_DOI,
+	   sizeOfCrystal_x,
 	   sizeOfCrystal_tangential,
 	   sizeOfCrystal_axial,
        numberOfCrystal_DOI,             
@@ -396,7 +589,7 @@ function crystalConstruction(det::PetDetector)::CxxPtr{G4VPhysicalVolume}
 	sizeOfBlockDetector_DOI, sizeOfBlockDetector_axial, sizeOfBlockDetector_tangential) = sizeBlock(det)
 
 	#Define the solid crystal
-	crystalSolid = G4Box("Crystal", sizeOfCrystal_DOI/2.0, 
+	crystalSolid = G4Box("Crystal", sizeOfCrystal_x/2.0, 
                          sizeOfCrystal_tangential/2.0, sizeOfCrystal_axial/2.0)
 
 	#Define the local volume of the crystal
@@ -408,7 +601,7 @@ function crystalConstruction(det::PetDetector)::CxxPtr{G4VPhysicalVolume}
 	crystalIndex = 0
 	for i_DOI in 0:numberOfCrystal_DOI-1
 
-		crystalPositionX=(i_DOI-numberOfCrystal_DOI/2.0 + 0.5)*(sizeOfCrystal_DOI + crystalGap_DOI)
+		crystalPositionX=(i_DOI-numberOfCrystal_DOI/2.0 + 0.5)*(sizeOfCrystal_x + crystalGap_DOI)
 
 		for i_axial in 0:numberOfCrystal_axial-1 
 			crystalPositionZ = (i_axial-numberOfCrystal_axial/2.0 
@@ -439,15 +632,17 @@ end
 
 
 # ╔═╡ f2364278-3b4e-4cb7-bf1c-eac0eefd08ff
-pv2 = crystalConstruction(pdet)
-
-# ╔═╡ 5517fd83-f6cf-4f3a-adfd-6e61e44944c0
-draw(pv2[], wireframe=true)
+if drawblk
+	let
+		pv = crystalConstruction(pdet)
+		draw(pv[], wireframe=true)
+	end
+end
 
 # ╔═╡ 09220519-0785-4819-a1c3-a5e1e92aeead
 function petDetectorConstruction(det::PetDetector)::CxxPtr{G4VPhysicalVolume}
     (; worldSizeXY, worldSizeZ, crstName,
-	   sizeOfCrystal_DOI,
+	   sizeOfCrystal_x,
 	   sizeOfCrystal_tangential,
 	   sizeOfCrystal_axial,
        numberOfCrystal_DOI,             
@@ -466,7 +661,7 @@ function petDetectorConstruction(det::PetDetector)::CxxPtr{G4VPhysicalVolume}
 	println(" ++ pet Detector construction\n, worldSizeXY =", worldSizeXY,
 	        " worldSizeZ = ", worldSizeZ,
 		    " crstName   =",  crstName,
-		    " sizeOfCrystal_DOI = ", sizeOfCrystal_DOI,
+		    " sizeOfCrystal_x = ", sizeOfCrystal_x,
 	        " sizeOfCrystal_tangential =", sizeOfCrystal_tangential,
 	        " sizeOfCrystal_axial =", sizeOfCrystal_axial,
             " numberOfCrystal_DOI =", numberOfCrystal_DOI,          
@@ -513,7 +708,7 @@ function petDetectorConstruction(det::PetDetector)::CxxPtr{G4VPhysicalVolume}
 	# Define air volume (box) to fill the detector block. 
     # Crystal elements (scintillators) are then placed inside.
 	
-	sizeOfAirBox_DOI = (numberOfCrystal_DOI * sizeOfCrystal_DOI
+	sizeOfAirBox_DOI = (numberOfCrystal_DOI * sizeOfCrystal_x
     ) + (numberOfCrystal_DOI - 1) * crystalGap_DOI
 	sizeOfAirBox_axial = (numberOfCrystal_axial * sizeOfCrystal_axial
     ) + (numberOfCrystal_axial - 1) * crystalGap_axial
@@ -683,16 +878,40 @@ using Pkg; Pkg.activate(findrdir())
 # ╔═╡ Cell order:
 # ╠═daacda17-5c47-4e09-add1-657525eeefb9
 # ╠═10c0c25c-51c8-4df9-a173-5219b0066b0d
+# ╠═d96ff12a-912b-42f1-aa5a-e2e3e094013b
 # ╠═d3b7d9f0-c1e3-4b7c-8fdb-60c1f87c5288
-# ╠═2981407b-fe86-49f4-a56e-eb8750ea4803
-# ╠═9b0557ec-2eaa-4179-9e6d-4d29eed78585
-# ╠═f9c9986c-c7c6-4b21-85a6-7f37d119a7ec
-# ╠═8abdeb8e-5124-465c-87cf-e6a7d05b4d1b
-# ╠═6b19af15-4cdc-4bfa-8d86-02e742df8ba1
-# ╠═ba184fb2-1b74-4728-ab9e-eb213a178808
+# ╠═d611396b-42c5-45f1-a7d2-a9ca35e201b4
+# ╠═7d57da90-c068-49be-86a0-44b9bdb65650
+# ╠═a6ec6b55-c3a4-422f-87e4-85bdc4f0653f
+# ╠═16cc8b24-b929-4db5-9600-088ecd47200d
+# ╠═7f2f5fe2-07b7-42df-92b5-a399093a13e4
+# ╠═e6a841fb-cdbc-47fc-acef-ad93b9ec0970
+# ╠═cf75476c-44f6-4a81-b14d-28d43ebc60f4
+# ╠═47823b34-fa27-4964-9ffa-7731999718f0
+# ╠═d8f64915-fa87-43cf-8071-118f3e4024cc
+# ╠═b8fd8ee9-458b-4a31-a7cb-3ade41937385
+# ╠═2de84055-45d5-494f-aaf6-1d1c541143c2
+# ╠═22474b14-f74b-44d5-b42e-2eee640d3ae8
+# ╠═d443a4a2-652d-4a44-bd80-8e8516c122f6
+# ╠═ec06700d-867e-4dab-88de-0873cba1e7d9
+# ╠═61dfd680-0d2a-40ff-91a5-7b167e2e753d
+# ╠═32b7f676-3db7-4208-b3f4-61ac2839bb3d
+# ╠═03f8baef-c40c-4abd-b0ae-2c4dd3c0538f
+# ╠═a1a32ef5-5d2a-4e21-ad57-0c0513d9c5ef
+# ╠═fb17313d-6d76-4732-acca-058d0b8209f7
+# ╠═094936fc-019f-4ea2-be29-39ec888db81a
+# ╠═735a817c-3aa8-492c-bace-03436f51220e
+# ╠═95a18519-34e1-4fcb-ab97-c12d37a7ab89
+# ╠═12270d91-2a57-4ac2-a277-7e3c806ddb3a
+# ╠═c464eff2-733a-40ce-9b5e-03eae2c63913
+# ╠═fb0098b4-fe81-4a72-bcc6-bc6c7d0eedf9
+# ╠═88f2904f-b1bf-406b-a0e4-69b533fe8281
 # ╠═5683139e-0409-4c2c-9636-3df16d394410
 # ╠═f2364278-3b4e-4cb7-bf1c-eac0eefd08ff
-# ╠═5517fd83-f6cf-4f3a-adfd-6e61e44944c0
+# ╠═554b8b2e-5c5a-4ba1-8eb2-e97c104c3327
+# ╠═ba184fb2-1b74-4728-ab9e-eb213a178808
+# ╠═47110cdf-c511-4f95-b1cb-81236e436659
+# ╠═e61962d4-cb13-43d1-ac1d-550d0c69ff8e
 # ╠═b43e765f-c4ae-4e73-8fb8-d11d5a80a6db
 # ╠═fc732bc2-cc9e-4416-bd6a-71438b158402
 # ╠═9e436e02-ccf7-4ee6-b104-1e0c34991131
